@@ -161,7 +161,7 @@ class _HomeState extends State<Home> {
 
  floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _navigateToScreen(const Hometab()); // Navega para a tela de Perfil
+          _navigateToScreen(const Hometab()); 
         },
         backgroundColor: Colors.blue[600],
         child: const Icon(Icons.person),
@@ -169,7 +169,7 @@ class _HomeState extends State<Home> {
 
       bottomNavigationBar: BottomNavigationBar(
         onTap: (index) {
-          // Navegação por índice do BottomNavigationBar
+         
           switch (index) {
             case 0:
               _navigateToScreen(const Hospitais());

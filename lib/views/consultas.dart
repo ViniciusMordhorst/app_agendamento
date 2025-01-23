@@ -86,7 +86,7 @@ void _navigateToScreen(Widget telas) {
                   const Text("Selecione uma ou mais das opções com a qual se identifica"),
                   CheckboxListTile(
                     title: const Text("Uso de Alcool"),
-                    subtitle: const Text("Usa ou costuma ingerir bedidas alcoolicas") ,
+                    subtitle: const Text("Usa ou costuma ingerir bedidas alcoolicas"),
                     value: _alcool,
                    onChanged: (bool? value) {
                     setState(() {

@@ -264,9 +264,9 @@ return Scaffold(
             });
           },
         ),
-        const SizedBox(width: 8), // Espaço entre os DropdownButtons
+        const SizedBox(width: 8), 
 
-        Text('/'), // Ou pode remover o texto caso não queira
+        Text('/'), 
         const SizedBox(width: 10),
         DropdownButton<String>(
           value: _minuto,
