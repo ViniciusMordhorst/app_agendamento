@@ -98,11 +98,11 @@ void abrirCaixaTF({String? docID}) {
                       children: [
                       //botão de update
                       IconButton(onPressed: () => abrirCaixaTF(docID: docID),
-                        icon: const Icon(Icons.update),
+                        icon: const Icon(Icons.update, color: Colors.amber,),
                     ),
 
                     IconButton(onPressed: () => firestoreService.deleteMedico(docID),
-                    icon: const Icon(Icons.delete),
+                    icon: const Icon(Icons.delete, color: Colors.red,),
                     ),
                   ],
                 ),
