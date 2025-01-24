@@ -1,7 +1,9 @@
+import 'package:agendamento/controller/firestore.dart';
 import 'package:agendamento/views/Agendar.dart';
 import 'package:agendamento/views/consultas.dart';
 import 'package:agendamento/views/hometab.dart';
 import 'package:agendamento/views/hospitais.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class Medicos extends StatefulWidget {
@@ -12,112 +14,52 @@ class Medicos extends StatefulWidget {
 }
 
 class _MedicosState extends State<Medicos> {
-  final List<String> _medicos = <String>['Médico 1'];
 
-void _navigateToScreen(Widget telas) {
+  final FirestoreService firestoreService = FirestoreService();
+  
+ 
+ void _navigateToScreen(Widget telas) {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => telas),
     );
   }
-  void _adicionarItem(){
-    setState(() {
-    _medicos.add('Médico ${_medicos.length + 1}');
-    });
 
-  }
-
-  void _removerItem (int index){
-    setState(() {
-      _medicos.removeAt(index);
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Usuário excluido com sucesso'),
-    duration: Durations.short1,
+  final TextEditingController textController = TextEditingController();
+   
+void abrirCaixaTF({String? docID}) {
+  showDialog(
+    context: context,
+   builder: (context) => AlertDialog(
+    content: TextField(
+      controller: textController,
     ),
-    );
+    actions: [
+      //botão salvar
+      ElevatedButton(
+        onPressed: () {
+          // adicionar médico
+          if (docID == null) {
+          firestoreService.addMedico(textController.text);
+          } else {
+            firestoreService.updateMedico(docID, textController.text);
 
-  }
+          }
+          
+          //limpar TC
+          textController.clear();  
+          
+          //fechar caixa
 
-  Widget listView(){
-    return ListView(
-    padding: const EdgeInsets.all(8),
-    children: [
-      Card(
-        color: Colors.amber[100],
-        child: ListTile(
-          leading: Icon(
-            Icons.account_circle,
-            size: 32,
-            color: Colors.lightBlueAccent,
-          ),
-          title: const Text('Médico 1'),
-        ),
-      ),
-        Card(
-        color: Colors.amber[100],
-        child: ListTile(
-          leading: Icon(
-            Icons.account_circle,
-            size: 32,
-            color: Colors.lightBlueAccent,
-          ),
-          title: const Text('Médico 2'),
-        ),
-      ),
-      Card(
-        color: Colors.amber[100],
-        child: ListTile(
-          leading: Icon(
-            Icons.account_circle,
-            size: 32,
-            color: Colors.lightBlueAccent,
-          ),
-       title: const Text('Médico 3'),
-        ),
-      ),
-      Card(
-        color: Colors.amber[100],
-        child: ListTile(
-          leading: Icon(
-            Icons.account_circle,
-            size: 32,
-            color: Colors.lightBlueAccent,
-          ),
-          title: const Text('Médico 4'),
-        ),
-      ),
+          Navigator.pop(context);
+                },
+       child: Text("Adicionar")),
     ],
-  );
-}
-Widget listViewBuilder(){
-  return ListView.builder(
-    padding: const EdgeInsets.all(8),
-    itemCount: _medicos.length,
-    itemBuilder: (context, index) {
-      return Card(
-        color: Colors.blueAccent[100],
-        child: ListTile(
-          leading: Icon(
-            Icons.account_circle,
-            size: 32,
-            color: Colors.lime,
-          ),
-          trailing: IconButton(
-            onPressed:(){ _removerItem(index);
-            },
-            icon: const Icon(Icons.delete,
-             color: Colors.red,
-             ),
-            ) ,
-          title:Text(_medicos[index]),
-        ),
-      );
-    },
-  );
-  
-}
+      
+   ),
+   );
 
+}
 
   @override
   Widget build(BuildContext context) {
@@ -127,11 +69,56 @@ Widget listViewBuilder(){
       backgroundColor: Colors.blue[600],
         title:  const Text('Lista de Médicos'),
       ),
-      body: SafeArea(
-        child: listViewBuilder()
-        ),
+     body: StreamBuilder<QuerySnapshot>(
+       stream: firestoreService.getMedicoStream(),
+       builder: (context, snapshot) {
+          //pega todas as informações, caso tenha
+          if (snapshot.hasData){
+            List listaMedicos = snapshot.data!.docs;
+
+            return ListView.builder(
+              itemCount: listaMedicos.length,
+              itemBuilder: (context, index) {
+                
+                  // pega cada documento individual
+                DocumentSnapshot document = listaMedicos[index];
+                String docID = document.id;
+
+                  //pega cada medico de cada documento
+                Map<String, dynamic> data =
+                 document.data() as Map<String, dynamic>;
+
+                 String medicoNome = data['Nome'];
+                  //mostra o listtile
+
+                  return ListTile(
+                    title: Text(medicoNome),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min ,
+                      children: [
+                      //botão de update
+                      IconButton(onPressed: () => abrirCaixaTF(docID: docID),
+                        icon: const Icon(Icons.update),
+                    ),
+
+                    IconButton(onPressed: () => firestoreService.deleteMedico(docID),
+                    icon: const Icon(Icons.delete),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        } 
+          
+          // se não tem data retorna null
+          else {
+            return const Text("Nenhum médico cadastrado...");
+          }
+        }
+       ),
         floatingActionButton: FloatingActionButton(
-          onPressed: _adicionarItem, 
+          onPressed: abrirCaixaTF, 
           backgroundColor: Colors.blue[600],
           child: const Icon(Icons.add),
           ),
